@@ -1,4 +1,5 @@
 import { put } from "@vercel/blob";
+import { appendLeadToGoogleSheet, type LeadRecord } from "@/lib/google-sheets";
 
 export const runtime = "nodejs";
 
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
 
     const id = crypto.randomUUID();
     const createdAt = new Date().toISOString();
-    const record = {
+    const record: LeadRecord = {
       id,
       createdAt,
       name,
@@ -59,7 +60,15 @@ export async function POST(request: Request) {
       contentType: "application/json",
     });
 
-    return Response.json({ ok: true });
+    let googleSheetSynced = false;
+    try {
+      const syncResult = await appendLeadToGoogleSheet(record);
+      googleSheetSynced = syncResult.status === "synced";
+    } catch (error) {
+      console.error("Failed to sync lead to Google Sheets", error);
+    }
+
+    return Response.json({ ok: true, googleSheetSynced });
   } catch (error) {
     console.error("Failed to save lead", error);
     return Response.json({ message: "Não foi possível salvar seus dados agora." }, { status: 500 });
