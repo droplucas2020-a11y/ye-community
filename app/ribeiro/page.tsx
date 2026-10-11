@@ -33,7 +33,7 @@ export default function RibeiroPage() {
     <main className="overflow-x-clip bg-[#070707]">
       <Header
         brandHref="/"
-        links={[["A aula", "#aula"], ["Local", "#local"], ["Catálogo YE", "/"]]}
+        links={[["A aula", "#aula"], ["Local", "#local"], ["Agenda YE", "/#agenda"]]}
         ctaLabel="Garantir minha vaga"
       />
 

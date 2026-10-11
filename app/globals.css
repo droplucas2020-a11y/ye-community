@@ -128,6 +128,25 @@ body {
   background-size: 72px 72px;
 }
 
+.ye-home-grid {
+  background-image:
+    linear-gradient(rgb(232 201 139 / .065) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(232 201 139 / .065) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: linear-gradient(to bottom, black 5%, transparent 92%);
+}
+
+.ye-gold-text {
+  color: #e8c98b;
+  text-shadow: 0 0 48px rgb(232 201 139 / .08);
+}
+
+.ye-ticker { animation: ye-ticker 24s linear infinite; }
+
+@keyframes ye-ticker {
+  to { transform: translateX(-50%); }
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(26px);
@@ -151,4 +170,5 @@ body {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
+  .ye-ticker { animation: none; }
 }
