@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { WeaveSpinner } from "@/components/ui/weave-spinner";
@@ -52,11 +53,7 @@ export function SiteIntro({ autoCloseMs = 2600 }: SiteIntroProps) {
       <div className="absolute left-1/2 top-1/2 size-[min(72vw,620px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#5d45ff]/12 blur-[120px]" aria-hidden="true" />
 
       <div className="relative flex w-full max-w-3xl flex-col items-center text-center">
-        <div className="mb-4 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.34em] text-white/55">
-          <span className="h-px w-8 bg-[#d9ff43]" />
-          YE Community
-          <span className="h-px w-8 bg-[#d9ff43]" />
-        </div>
+        <Image src="/images/ye-logo.png" alt="YE Community" width={512} height={512} priority className="mb-4 size-24 object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,.45)] sm:size-28" />
 
         <WeaveSpinner color="#d9ff43" size={150} className="my-2" />
 

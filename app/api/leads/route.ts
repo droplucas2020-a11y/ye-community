@@ -1,4 +1,5 @@
-import { put } from "@vercel/blob";
+import { list, put } from "@vercel/blob";
+import { ribeiro } from "@/data/ribeiro";
 import { appendLeadToGoogleSheet, type LeadRecord } from "@/lib/google-sheets";
 
 export const runtime = "nodejs";
@@ -24,9 +25,27 @@ export async function POST(request: Request) {
     const whatsapp = cleanText(body.whatsapp, 24);
     const email = cleanText(body.email, 160).toLowerCase();
     const phoneDigits = whatsapp.replace(/\D/g, "");
+    const isRibeiro = body.event === ribeiro.slug;
+    const age = Number(body.age);
 
-    if (name.length < 2 || phoneDigits.length < 8 || phoneDigits.length > 15 || !/^\S+@\S+\.\S+$/.test(email) || body.consent !== true) {
+    const invalid = isRibeiro
+      ? !Number.isInteger(age) || age < 5 || age > 99
+      : !/^\S+@\S+\.\S+$/.test(email);
+    if (name.length < 2 || phoneDigits.length < 8 || phoneDigits.length > 15 || invalid || body.consent !== true) {
       return Response.json({ message: "Confira os campos obrigatórios e tente novamente." }, { status: 400 });
+    }
+
+    // Aula YE × Ribeiro: uma vaga por WhatsApp e no máximo ribeiro.spots inscrições.
+    // ponytail: duas inscrições simultâneas na última vaga podem passar juntas; aceitável para 60 vagas.
+    const ribeiroPath = `leads/ribeiro/${phoneDigits}.json`;
+    if (isRibeiro) {
+      const { blobs } = await list({ prefix: "leads/ribeiro/", limit: 1000 });
+      if (blobs.some((blob) => blob.pathname === ribeiroPath)) {
+        return Response.json({ ok: true, duplicate: true });
+      }
+      if (blobs.length >= ribeiro.spots) {
+        return Response.json({ message: "As vagas desta aula já foram preenchidas.", soldOut: true }, { status: 409 });
+      }
     }
 
     const id = crypto.randomUUID();
@@ -37,9 +56,10 @@ export async function POST(request: Request) {
       name,
       whatsapp,
       whatsappDigits: phoneDigits,
-      email,
-      company: cleanText(body.company, 120),
-      status: "Novo lead",
+      email: isRibeiro ? "" : email,
+      company: isRibeiro ? "" : cleanText(body.company, 120),
+      status: isRibeiro ? "Inscrito" : "Novo lead",
+      ...(isRibeiro && { event: ribeiro.slug, instagram: cleanText(body.instagram, 60), age }),
       source: {
         page: cleanText(body.page, 200),
         referrer: cleanText(body.referrer, 500),
@@ -54,7 +74,7 @@ export async function POST(request: Request) {
     };
 
     const safeTimestamp = createdAt.replace(/[:.]/g, "-");
-    await put(`leads/${safeTimestamp}-${id}.json`, JSON.stringify(record), {
+    await put(isRibeiro ? ribeiroPath : `leads/${safeTimestamp}-${id}.json`, JSON.stringify(record), {
       access: "private",
       addRandomSuffix: false,
       contentType: "application/json",

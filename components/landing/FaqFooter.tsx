@@ -1,7 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { event } from "@/data/event";
 import { CtaLink } from "./CtaLink";
 import { Reveal } from "./Reveal";
+import { SiteFooter } from "./SiteFooter";
 
 const faqs = [
   ["Quando será o evento?", "05 de outubro de 2026, das 14h às 16h."],
@@ -29,7 +29,7 @@ export function FaqFooter() {
         <Reveal className="relative mx-auto max-w-6xl text-center"><div className="flex justify-center gap-6 text-sm font-black uppercase tracking-[0.16em]"><span>05 Outubro</span><span>14h</span></div><h2 className="mt-8 text-[clamp(3.3rem,7.5vw,8rem)] font-black uppercase leading-[0.86] tracking-[-0.08em]">Talvez você ainda não saiba exatamente qual será o seu próximo passo.</h2><p className="mt-6 text-[clamp(2rem,4vw,4.6rem)] font-black uppercase tracking-[-0.055em] text-black/48">Mas ele pode começar aqui.</p><p className="mt-9 text-sm font-black uppercase tracking-[0.16em]">Thiago Oshiro × YE Community</p><CtaLink className="mt-8 bg-black text-white hover:bg-[#5d45ff]">Garantir minha vaga</CtaLink><p className="mt-14 text-xs font-black uppercase tracking-[0.28em]">Your Environment Matters.</p></Reveal>
       </section>
 
-      <footer className="border-t border-white/10 bg-[#070707] px-5 py-10 text-white sm:px-8 lg:px-12"><div className="mx-auto flex max-w-[1440px] flex-col gap-7 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-black uppercase tracking-[0.2em]">YE Community</p><p className="mt-2 text-sm text-white/42">Your Environment Matters.</p></div><a href={event.instagramCommunity} target="_blank" rel="noreferrer" aria-label="Instagram da YE Community" className="text-sm font-bold text-white/65 transition hover:text-white">@ye.community ↗</a><p className="text-xs text-white/35">© 2026 YE Community. Todos os direitos reservados.</p></div></footer>
+      <SiteFooter />
     </>
   );
 }

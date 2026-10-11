@@ -3,18 +3,19 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "YE Community apresenta Thiago Oshiro | 05 de Outubro",
+  metadataBase: new URL("https://yecommunity.vercel.app"),
+  title: "YE Community | Your Environment Matters",
   description:
-    "Uma tarde de empreendedorismo, negócios, conexões e novas perspectivas. Participe do encontro da YE Community com Thiago Oshiro em Manaus.",
+    "Encontros, aulas e experiências da YE Community em Manaus. Escolha a sua e garanta sua vaga.",
   openGraph: {
-    title: "YE Community apresenta Thiago Oshiro",
-    description: "05 de Outubro de 2026 • 14h • Manaus/AM",
+    title: "YE Community | Your Environment Matters",
+    description: "Encontros, aulas e experiências da YE Community em Manaus.",
     type: "website",
     locale: "pt_BR",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/images/ye-logo.png",
+    shortcut: "/images/ye-logo.png",
   },
 };
 

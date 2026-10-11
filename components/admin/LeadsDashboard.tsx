@@ -11,6 +11,9 @@ type Lead = {
   email: string;
   company: string;
   status: string;
+  event?: string;
+  instagram?: string;
+  age?: number;
   source?: {
     page?: string;
     referrer?: string;
@@ -22,6 +25,17 @@ type Lead = {
   };
 };
 
+const eventFilters = [["todos", "Todos"], ["ribeiro", "YE × Ribeiro"], ["oshiro", "Thiago Oshiro"]] as const;
+type EventFilter = (typeof eventFilters)[number][0];
+
+function eventKey(lead: Lead) {
+  return lead.event === "ribeiro" ? "ribeiro" : "oshiro";
+}
+
+function eventLabel(lead: Lead) {
+  return eventKey(lead) === "ribeiro" ? "YE × Ribeiro" : "Thiago Oshiro";
+}
+
 function csvCell(value: unknown) {
   return `"${String(value ?? "").replace(/"/g, '""')}"`;
 }
@@ -32,6 +46,8 @@ export function LeadsDashboard() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [message, setMessage] = useState("");
+  const [filter, setFilter] = useState<EventFilter>("todos");
+  const visibleLeads = filter === "todos" ? leads : leads.filter((lead) => eventKey(lead) === filter);
 
   async function loadLeads(event?: FormEvent) {
     event?.preventDefault();
@@ -56,11 +72,14 @@ export function LeadsDashboard() {
   }
 
   function exportCsv() {
-    const headers = ["Data", "Nome", "WhatsApp", "E-mail", "Empresa ou projeto", "Status", "Página", "Origem", "Mídia", "Campanha", "Conteúdo", "Termo", "Referência"];
-    const rows = leads.map((lead) => [
+    const headers = ["Data", "Evento", "Nome", "WhatsApp", "Instagram", "Idade", "E-mail", "Empresa ou projeto", "Status", "Página", "Origem", "Mídia", "Campanha", "Conteúdo", "Termo", "Referência"];
+    const rows = visibleLeads.map((lead) => [
       new Date(lead.createdAt).toLocaleString("pt-BR"),
+      eventLabel(lead),
       lead.name,
       lead.whatsapp,
+      lead.instagram,
+      lead.age,
       lead.email,
       lead.company,
       lead.status,
@@ -76,7 +95,7 @@ export function LeadsDashboard() {
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = `leads-yecommunity-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `leads-yecommunity-${filter}-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -87,7 +106,7 @@ export function LeadsDashboard() {
         <form onSubmit={loadLeads} className="w-full max-w-md rounded-[1.6rem] border border-white/15 bg-[#101010] p-7 sm:p-9">
           <span className="grid size-12 place-items-center rounded-full bg-[#d9ff43] text-black"><LockKeyhole className="size-5" /></span>
           <h1 className="mt-7 text-3xl font-black uppercase tracking-[-0.05em]">Cadastros YE</h1>
-          <p className="mt-3 text-sm leading-relaxed text-white/50">Área privada para consultar e exportar os contatos interessados no evento.</p>
+          <p className="mt-3 text-sm leading-relaxed text-white/50">Área privada para consultar e exportar os cadastros e inscrições dos eventos.</p>
           <label className="mt-7 grid gap-2 text-sm font-bold">
             Senha de acesso
             <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" className="min-h-13 rounded-xl border border-white/15 bg-white/[0.055] px-4 outline-none focus:border-[#d9ff43]" />
@@ -105,29 +124,34 @@ export function LeadsDashboard() {
     <main className="min-h-screen bg-[#070707] px-5 py-10 text-white sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1440px]">
         <div className="flex flex-col gap-6 border-b border-white/15 pb-8 sm:flex-row sm:items-end sm:justify-between">
-          <div><p className="eyebrow text-[#d9ff43]">Área privada</p><h1 className="mt-3 text-4xl font-black uppercase tracking-[-0.06em] sm:text-6xl">Leads YE Community</h1><p className="mt-3 text-white/45">{leads.length} cadastro{leads.length === 1 ? "" : "s"} registrado{leads.length === 1 ? "" : "s"}</p></div>
+          <div><p className="eyebrow text-[#d9ff43]">Área privada</p><h1 className="mt-3 text-4xl font-black uppercase tracking-[-0.06em] sm:text-6xl">Leads YE Community</h1><p className="mt-3 text-white/45">{visibleLeads.length} cadastro{visibleLeads.length === 1 ? "" : "s"} registrado{visibleLeads.length === 1 ? "" : "s"}</p></div>
           <div className="flex flex-wrap gap-3">
             <button onClick={() => loadLeads()} disabled={loading} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 px-5 text-sm font-bold hover:bg-white/5"><RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} />Atualizar</button>
-            <button onClick={exportCsv} disabled={!leads.length} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#d9ff43] px-5 text-sm font-black text-black disabled:opacity-40"><Download className="size-4" />Exportar CSV</button>
+            <select value={filter} onChange={(event) => setFilter(event.target.value as EventFilter)} aria-label="Filtrar por evento" className="min-h-11 rounded-full border border-white/20 bg-[#101010] px-4 text-sm font-bold">
+              {eventFilters.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+            <button onClick={exportCsv} disabled={!visibleLeads.length} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#d9ff43] px-5 text-sm font-black text-black disabled:opacity-40"><Download className="size-4" />Exportar CSV</button>
           </div>
         </div>
 
         <div className="mt-8 overflow-x-auto rounded-2xl border border-white/12">
-          <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-            <thead className="bg-white/[0.06] text-xs uppercase tracking-[0.1em] text-white/45"><tr><th className="p-4">Data</th><th className="p-4">Nome</th><th className="p-4">WhatsApp</th><th className="p-4">E-mail</th><th className="p-4">Empresa / projeto</th><th className="p-4">Origem</th><th className="p-4">Status</th></tr></thead>
+          <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
+            <thead className="bg-white/[0.06] text-xs uppercase tracking-[0.1em] text-white/45"><tr><th className="p-4">Data</th><th className="p-4">Evento</th><th className="p-4">Nome</th><th className="p-4">WhatsApp</th><th className="p-4">Instagram / idade</th><th className="p-4">E-mail</th><th className="p-4">Empresa / projeto</th><th className="p-4">Origem</th><th className="p-4">Status</th></tr></thead>
             <tbody className="divide-y divide-white/10">
-              {leads.map((lead) => (
+              {visibleLeads.map((lead) => (
                 <tr key={lead.id} className="bg-[#101010] align-top hover:bg-white/[0.055]">
                   <td className="whitespace-nowrap p-4 text-white/55">{new Date(lead.createdAt).toLocaleString("pt-BR")}</td>
+                  <td className="whitespace-nowrap p-4 text-white/60">{eventLabel(lead)}</td>
                   <td className="p-4 font-bold">{lead.name}</td>
                   <td className="whitespace-nowrap p-4"><a className="text-[#d9ff43] hover:underline" href={`https://wa.me/55${lead.whatsapp.replace(/\D/g, "").replace(/^55/, "")}`} target="_blank" rel="noreferrer">{lead.whatsapp}</a></td>
-                  <td className="p-4"><a className="text-white/75 hover:underline" href={`mailto:${lead.email}`}>{lead.email}</a></td>
+                  <td className="whitespace-nowrap p-4 text-white/60">{[lead.instagram, lead.age && `${lead.age} anos`].filter(Boolean).join(" · ") || "—"}</td>
+                  <td className="p-4">{lead.email ? <a className="text-white/75 hover:underline" href={`mailto:${lead.email}`}>{lead.email}</a> : <span className="text-white/40">—</span>}</td>
                   <td className="p-4 text-white/60">{lead.company || "—"}</td>
                   <td className="p-4 text-white/60">{lead.source?.utmCampaign || lead.source?.utmSource || "Direto"}</td>
                   <td className="p-4"><span className="rounded-full border border-[#d9ff43]/30 px-3 py-1 text-xs font-bold text-[#d9ff43]">{lead.status}</span></td>
                 </tr>
               ))}
-              {!leads.length && <tr><td colSpan={7} className="p-12 text-center text-white/40">Nenhum cadastro recebido ainda.</td></tr>}
+              {!visibleLeads.length && <tr><td colSpan={9} className="p-12 text-center text-white/40">Nenhum cadastro recebido ainda.</td></tr>}
             </tbody>
           </table>
         </div>

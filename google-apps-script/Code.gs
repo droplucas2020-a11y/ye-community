@@ -16,6 +16,9 @@ const LEADS_HEADERS = [
   "UTM Term",
   "Consentimento",
   "Recebido na planilha",
+  "Evento",
+  "Instagram",
+  "Idade",
 ];
 
 /**
@@ -86,6 +89,9 @@ function doPost(event) {
       safeCell_(lead.source?.utmTerm),
       lead.consent === true ? "Sim" : "Não",
       new Date(),
+      lead.event === "ribeiro" ? "YE × Ribeiro" : "Thiago Oshiro",
+      safeCell_(lead.instagram),
+      safeCell_(lead.age),
     ]);
 
     const row = sheet.getLastRow();
@@ -105,6 +111,11 @@ function doPost(event) {
 function getOrCreateLeadsSheet_(spreadsheet) {
   let sheet = spreadsheet.getSheetByName(LEADS_SHEET_NAME);
   if (!sheet) sheet = spreadsheet.insertSheet(LEADS_SHEET_NAME);
+
+  // Planilha criada antes das colunas novas (Evento, Instagram, Idade): completa o cabeçalho.
+  if (sheet.getLastRow() > 0 && sheet.getLastColumn() < LEADS_HEADERS.length) {
+    sheet.getRange(1, 1, 1, LEADS_HEADERS.length).setValues([LEADS_HEADERS]);
+  }
 
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, LEADS_HEADERS.length).setValues([LEADS_HEADERS]);

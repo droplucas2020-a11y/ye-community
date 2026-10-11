@@ -7,6 +7,10 @@ export type LeadRecord = {
   email: string;
   company: string;
   status: string;
+  /** Presente só nas inscrições de eventos do catálogo (ex.: "ribeiro"). */
+  event?: string;
+  instagram?: string;
+  age?: number;
   source: {
     page: string;
     referrer: string;
